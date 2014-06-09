@@ -1,6 +1,6 @@
 #Mybatis分页插件 - PageHelper说明  
 <br/>  
-##最新版为3.2.0 版  
+##最新版为3.2.1 版  
 
 如果你也在用Mybatis，建议尝试该分页插件，这个一定是<b>最方便</b>使用的分页插件。  
 
@@ -65,6 +65,13 @@ Mybatis专栏：
     <!-- packageName为PageHelper类所在包名 -->
 	<plugin interceptor="packageName.PageHelper">
         <property name="dialect" value="mysql"/>
+        <!-- 该参数默认为false -->
+        <!-- 设置为true时，会将RowBounds第一个参数offset当成pageNum页码使用 -->
+        <!-- 和startPage中的pageNum效果一样-->
+        <property name="offsetAsPageNum" value="true"/>
+        <!-- 该参数默认为false -->
+        <!-- 设置为true时，使用RowBounds分页会进行count查询 -->
+        <property name="rowBoundsWithCount" value="true"/>
 	</plugin>
 </plugins>
 ```   
@@ -133,6 +140,12 @@ public void testPageHelperByStartPage() throws Exception {
 
 <br/><br/><br/><br/>
 ##更新日志   
+
+###v3.2.1
+
+1. 新增`offsetAsPageNum`参数，用来控制`RowBounds`中的`offset`是否作为`pageNum`使用，`pageNum`和`startPage`中的含义相同，`pageNum`是页码。该参数默认为`false`，使用默认值时，不需要配置该参数。
+
+2. 新增`rowBoundsWithCount`参数，用来控制使用`RowBounds`时是否执行`count`查询。该参数默认为`false`，使用默认值时，不需要配置该参数。
 
 ###v3.2.0
 
