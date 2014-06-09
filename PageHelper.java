@@ -29,15 +29,15 @@ import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
-import javax.xml.bind.PropertyException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
 /**
  * Mybatis - 通用分页拦截器
- * @version 3.2.0
+ *
  * @author liuzh/abel533/isea533
+ * @version 3.2.1
  * @url http://git.oschina.net/free/Mybatis_PageHelper
  */
 @Intercepts(@Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class}))
@@ -46,7 +46,12 @@ public class PageHelper implements Interceptor {
 
     private static final List<ResultMapping> EMPTY_RESULTMAPPING = new ArrayList<ResultMapping>(0);
 
-    private static String dialect = ""; //数据库方言
+    //数据库方言
+    private static String dialect = "";
+    //RowBounds参数offset作为PageNum使用 - 默认不使用
+    private static boolean offsetAsPageNum = false;
+    //RowBounds是否进行count查询 - 默认不查询
+    private static boolean rowBoundsWithCount = false;
 
     /**
      * 开始分页
@@ -65,13 +70,13 @@ public class PageHelper implements Interceptor {
      * @param pageSize
      */
     public static void startPage(int pageNum, int pageSize, boolean count) {
-        localPage.set(new Page(pageNum, pageSize, count? Page.SQL_COUNT: Page.NO_SQL_COUNT));
+        localPage.set(new Page(pageNum, pageSize, count ? Page.SQL_COUNT : Page.NO_SQL_COUNT));
     }
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
         final Object[] args = invocation.getArgs();
-        RowBounds rowBounds = (RowBounds)args[2];
+        RowBounds rowBounds = (RowBounds) args[2];
         if (localPage.get() == null && rowBounds == RowBounds.DEFAULT) {
             return invocation.proceed();
         } else {
@@ -87,7 +92,11 @@ public class PageHelper implements Interceptor {
             localPage.remove();
 
             if (page == null) {
-                page = new Page(rowBounds);
+                if (offsetAsPageNum) {
+                    page = new Page(rowBounds.getOffset(), rowBounds.getLimit(), rowBoundsWithCount ? Page.SQL_COUNT : Page.NO_SQL_COUNT);
+                } else {
+                    page = new Page(rowBounds, rowBoundsWithCount ? Page.SQL_COUNT : Page.NO_SQL_COUNT);
+                }
             }
             MappedStatement qs = newMappedStatement(ms, new BoundSqlSqlSource(boundSql));
             //将参数中的MappedStatement替换为新的qs，防止并发异常
@@ -100,7 +109,7 @@ public class PageHelper implements Interceptor {
                 msObject.setValue("sqlSource.boundSql.sql", getCountSql(sql));
                 //查询总数
                 Object result = invocation.proceed();
-                int totalCount = (Integer)((List) result).get(0);
+                int totalCount = (Integer) ((List) result).get(0);
                 page.setTotal(totalCount);
                 int totalPage = totalCount / page.getPageSize() + ((totalCount % page.getPageSize() == 0) ? 0 : 1);
                 page.setPages(totalPage);
@@ -131,6 +140,7 @@ public class PageHelper implements Interceptor {
 
     /**
      * 获取总数sql - 如果要支持其他数据库，修改这里就可以
+     *
      * @param sql
      * @return
      */
@@ -140,19 +150,20 @@ public class PageHelper implements Interceptor {
 
     /**
      * 获取分页sql - 如果要支持其他数据库，修改这里就可以
+     *
      * @param sql
      * @param page
      * @return
      */
     private String getPageSql(String sql, Page page) {
         StringBuilder pageSql = new StringBuilder(200);
-        if("mysql".equals(dialect)){
+        if ("mysql".equals(dialect)) {
             pageSql.append(sql);
-            pageSql.append(" limit "+page.getStartRow()+","+page.getPageSize());
-        }else if("hsqldb".equals(dialect)){
+            pageSql.append(" limit " + page.getStartRow() + "," + page.getPageSize());
+        } else if ("hsqldb".equals(dialect)) {
             pageSql.append(sql);
-            pageSql.append(" LIMIT "+page.getPageSize()+" OFFSET "+page.getStartRow());
-        }else if("oracle".equals(dialect)){
+            pageSql.append(" LIMIT " + page.getPageSize() + " OFFSET " + page.getStartRow());
+        } else if ("oracle".equals(dialect)) {
             pageSql.append("select * from ( select temp.*, rownum row_id from ( ");
             pageSql.append(sql);
             pageSql.append(" ) temp where rownum <= ").append(page.getEndRow());
@@ -163,9 +174,11 @@ public class PageHelper implements Interceptor {
 
     private class BoundSqlSqlSource implements SqlSource {
         BoundSql boundSql;
+
         public BoundSqlSqlSource(BoundSql boundSql) {
             this.boundSql = boundSql;
         }
+
         public BoundSql getBoundSql(Object parameterObject) {
             return boundSql;
         }
@@ -224,12 +237,18 @@ public class PageHelper implements Interceptor {
 
     public void setProperties(Properties p) {
         dialect = p.getProperty("dialect");
-        if (dialect!=null&&dialect.equals("")) {
-            try {
-                throw new PropertyException("dialect property is not found!");
-            } catch (PropertyException e) {
-                e.printStackTrace();
-            }
+        if (dialect == null || dialect.equals("")) {
+            throw new RuntimeException("Mybatis分页插件PageHelper无法获取dialect参数!");
+        }
+        //offset作为PageNum使用
+        String offset = p.getProperty("offsetAsPageNum");
+        if (offset != null && offset.toUpperCase().equals("TRUE")) {
+            offsetAsPageNum = true;
+        }
+        //RowBounds方式是否做count查询
+        String withcount = p.getProperty("rowBoundsWithCount");
+        if (withcount != null && withcount.toUpperCase().equals("TRUE")) {
+            rowBoundsWithCount = true;
         }
     }
 }

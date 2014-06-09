@@ -28,12 +28,15 @@ import java.util.List;
 
 /**
  * Mybatis - 分页对象
- * @version 3.2.0
+ *
  * @author liuzh/abel533/isea533
+ * @version 3.2.1
  * @url http://git.oschina.net/free/Mybatis_PageHelper
  */
 public class Page<E> extends ArrayList<E> {
-    /**不进行count查询*/
+    /**
+     * 不进行count查询
+     */
     public static final int NO_SQL_COUNT = -1;
     public static final int SQL_COUNT = 0;
     private int pageNum;
@@ -56,13 +59,13 @@ public class Page<E> extends ArrayList<E> {
         this.endRow = pageNum * pageSize;
     }
 
-    public Page(RowBounds rowBounds){
+    public Page(RowBounds rowBounds, int total) {
         super(rowBounds.getLimit());
         this.pageSize = rowBounds.getLimit();
         this.startRow = rowBounds.getOffset();
         //RowBounds方式默认不求count总数，如果想求count,可以修改这里为SQL_COUNT
-        this.total = NO_SQL_COUNT;
-        this.endRow = this.startRow+this.pageSize;
+        this.total = total;
+        this.endRow = this.startRow + this.pageSize;
     }
 
     public List<E> getResult() {
