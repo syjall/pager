@@ -1,6 +1,6 @@
 #Mybatis分页插件 - PageHelper说明  
 <br/>  
-##最新版为3.2.1 版  
+##最新版为3.2.2 版  
 
 如果你也在用Mybatis，建议尝试该分页插件，这个一定是<b>最方便</b>使用的分页插件。  
 
@@ -24,7 +24,7 @@
     <dependency>
         <groupId>com.github.pagehelper</groupId>
         <artifactId>pagehelper</artifactId>
-        <version>3.2.1</version>
+        <version>3.2.2</version>
     </dependency>
 ```
 
@@ -144,6 +144,14 @@ Mybatis专栏：
 
 <br/><br/>
 ##更新日志   
+
+###v3.2.2
+
+1. 简单重构优化代码。  
+
+2. 新增`PageInfo`包装类，对分页结果Page<E>进行封装，方便EL使用。
+
+3. 将`SystemMetaObject`类的`fromObject`方法内置到分页插件中，方便低版本的Mybatis使用该插件。   
 
 ###v3.2.1
 
