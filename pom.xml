@@ -33,26 +33,26 @@
 
     <name>pagehelper 5</name>
     <description>Mybatis Pagination Plugin</description>
-    <url>https://github.com/pagehelper/Mybatis-PageHelper</url>
+    <url>https://github.com/syjall/pager</url>
 
     <licenses>
         <license>
             <name>The MIT License (MIT)</name>
-            <url>https://github.com/pagehelper/Mybatis-PageHelper/blob/master/LICENSE</url>
+            <url>https://github.com/syjall/blob/master/LICENSE</url>
         </license>
     </licenses>
 
     <developers>
         <developer>
-            <name>abel533</name>
-            <email>abel533@gmail.com</email>
+            <name>897461976</name>
+            <email>897461976@qq.com</email>
         </developer>
     </developers>
 
     <scm>
-        <connection>scm:git:git@github.com:pagehelper/Mybatis-PageHelper.git</connection>
-        <developerConnection>scm:git:git@github.com:pagehelper/Mybatis-PageHelper.git</developerConnection>
-        <url>git@github.com:pagehelper/Mybatis-PageHelper.git</url>
+        <connection>scm:git:git@github.com:syjall/pager.git</connection>
+        <developerConnection>scm:git:git@github.com:syjall/pager.git</developerConnection>
+        <url>git@github.com:syjall/pager.git</url>
     </scm>
 
     <properties>
